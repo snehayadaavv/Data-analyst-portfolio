@@ -1,0 +1,7 @@
+channel,variant,visits,signups,activations,visit_to_signup_pct,signup_to_activation_pct,visit_to_activation_pct
+Email,A,10,5,3,50.0,60.0,30.0
+Email,B,6,4,0,66.67,0.0,0.0
+Paid Social,A,28,7,2,25.0,28.57,7.14
+Paid Social,B,36,11,8,30.56,72.73,22.22
+Search,A,20,7,4,35.0,57.14,20.0
+Search,B,20,4,3,20.0,75.0,15.0

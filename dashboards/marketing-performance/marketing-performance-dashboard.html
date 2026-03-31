@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marketing Performance Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f3ef;
+    --surface: #ffffff;
+    --surface2: #f0ede8;
+    --surface3: #e8e4dd;
+    --border: rgba(0,0,0,0.08);
+    --border2: rgba(0,0,0,0.14);
+    --text: #1a1714;
+    --text2: #5c554a;
+    --text3: #9e9385;
+    --ink: #1a1714;
+    --red: #e8390e;
+    --orange: #f07328;
+    --gold: #d4a017;
+    --green: #1a7a4a;
+    --blue: #1a4fd6;
+    --purple: #7c3aed;
+    --teal: #0891b2;
+    --accent: #e8390e;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* Noise texture overlay */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  .dashboard {
+    position: relative;
+    z-index: 1;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 0 48px;
+  }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    background: var(--ink);
+    color: #f5f3ef;
+    padding: 0 36px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .topbar-brand {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #fff;
+  }
+
+  .topbar-divider {
+    width: 1px;
+    height: 24px;
+    background: rgba(255,255,255,0.15);
+  }
+
+  .topbar-title {
+    font-size: 13px;
+    color: rgba(255,255,255,0.55);
+    font-weight: 400;
+    letter-spacing: 0.3px;
+  }
+
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .filter-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: rgba(255,255,255,0.7);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .filter-pill:hover { background: rgba(255,255,255,0.14); }
+
+  .filter-pill select {
+    background: transparent;
+    border: none;
+    color: rgba(255,255,255,0.9);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    outline: none;
+    cursor: pointer;
+  }
+
+  .filter-pill select option { background: #1a1714; color: #fff; }
+
+  .export-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--red);
+    border: none;
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: white;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── MAIN CONTENT ── */
+  .content {
+    padding: 28px 36px;
+  }
+
+  /* ── PAGE HEADER ── */
+  .page-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid var(--ink);
+  }
+
+  .page-header h1 {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -1.5px;
+    color: var(--ink);
+    line-height: 1;
+  }
+
+  .page-header h1 span {
+    color: var(--red);
+  }
+
+  .page-header-meta {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .period-badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    background: var(--ink);
+    color: #f5f3ef;
+    padding: 5px 12px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+  }
+
+  .update-info {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--text3);
+  }
+
+  /* ── KPI ROW ── */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 1px;
+    background: var(--border2);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+
+  .kpi-card {
+    background: var(--surface);
+    padding: 20px 18px;
+    position: relative;
+    cursor: default;
+    transition: background 0.15s;
+  }
+
+  .kpi-card:hover { background: #fdfcfa; }
+
+  .kpi-card.featured {
+    background: var(--ink);
+    color: #f5f3ef;
+  }
+
+  .kpi-card.featured .kpi-label { color: rgba(255,255,255,0.45); }
+  .kpi-card.featured .kpi-sub { color: rgba(255,255,255,0.4); }
+
+  .kpi-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--text3);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .kpi-value {
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .kpi-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .kpi-delta {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 3px;
+  }
+
+  .delta-pos { background: rgba(26,122,74,0.1); color: var(--green); }
+  .delta-neg { background: rgba(232,57,14,0.1); color: var(--red); }
+  .delta-pos-inv { background: rgba(26,122,74,0.1); color: var(--green); }
+
+  .kpi-sub {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--text3);
+  }
+
+  /* ── SECTION LABEL ── */
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border2);
+  }
+
+  /* ── MAIN GRID ── */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .bottom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.1fr;
+    gap: 16px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    padding: 22px;
+    overflow: hidden;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 18px;
+  }
+
+  .card-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: -0.3px;
+  }
+
+  .card-subtitle {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--text3);
+    margin-top: 3px;
+  }
+
+  .tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    padding: 3px 8px;
+    border-radius: 3px;
+    border: 1px solid var(--border2);
+    color: var(--text3);
+    background: var(--surface2);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  /* ── CHANNEL TABLE ── */
+  .channel-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .channel-table th {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text3);
+    text-align: left;
+    padding: 0 10px 10px;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  .channel-table th:not(:first-child) { text-align: right; }
+
+  .channel-table td {
+    padding: 10px 10px;
+    font-size: 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+
+  .channel-table td:not(:first-child) {
+    text-align: right;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+  }
+
+  .channel-table tr:last-child td { border-bottom: none; }
+
+  .channel-table tr:hover td { background: var(--surface2); }
+
+  .ch-name {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 13px;
+  }
+
+  .ch-dot {
+    width: 8px; height: 8px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .roas-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+
+  .roas-track {
+    width: 50px; height: 4px;
+    background: var(--surface3);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .roas-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: var(--green);
+  }
+
+  .val-good { color: var(--green); font-weight: 700; }
+  .val-bad { color: var(--red); }
+  .val-mid { color: var(--orange); }
+
+  /* ── FUNNEL CHART ── */
+  .funnel-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 4px 0;
+  }
+
+  .funnel-stage {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .funnel-bar-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .funnel-bar-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .funnel-stage-name {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text2);
+    letter-spacing: 0.2px;
+  }
+
+  .funnel-stage-val {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  .funnel-track {
+    height: 28px;
+    background: var(--surface2);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .funnel-fill {
+    height: 100%;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    padding-left: 10px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    color: white;
+    white-space: nowrap;
+  }
+
+  .funnel-drop {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--text3);
+    margin-top: 2px;
+    margin-left: 2px;
+  }
+
+  .drop-arrow { color: var(--red); font-size: 10px; }
+  .drop-good { color: var(--green) !important; }
+
+  /* ── SCATTER PLOT ── */
+  .scatter-area {
+    position: relative;
+    height: 220px;
+  }
+
+  .scatter-area svg { width: 100%; height: 100%; }
+
+  /* ── WEEKLY TREND LINE ── */
+  .trend-area {
+    position: relative;
+    height: 160px;
+  }
+
+  .trend-area svg { width: 100%; height: 100%; overflow: visible; }
+
+  /* ── TOP/BOTTOM CAMPAIGNS ── */
+  .campaign-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .campaign-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .campaign-rank {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--text3);
+    width: 18px;
+    flex-shrink: 0;
+    text-align: center;
+  }
+
+  .campaign-name-wrap { flex: 1; min-width: 0; }
+
+  .campaign-name {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .campaign-channel {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--text3);
+  }
+
+  .campaign-bar-wrap { width: 80px; flex-shrink: 0; }
+
+  .campaign-track {
+    height: 5px;
+    background: var(--surface3);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .campaign-fill {
+    height: 100%;
+    border-radius: 3px;
+  }
+
+  .campaign-val {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+    width: 42px;
+    text-align: right;
+  }
+
+  .divider-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text3);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 6px 0;
+  }
+
+  .divider-label::before, .divider-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border2);
+  }
+
+  /* ── FOOTER ── */
+  .dash-footer {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer-tables {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .table-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    padding: 3px 8px;
+    border: 1px solid var(--border2);
+    border-radius: 3px;
+    color: var(--text3);
+    background: var(--surface2);
+  }
+
+  .footer-right {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--text3);
+  }
+
+  /* ── LEGEND ── */
+  .legend { display: flex; gap: 14px; }
+
+  .legend-item {
+    display: flex; align-items: center; gap: 5px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--text2);
+  }
+
+  .legend-swatch {
+    width: 10px; height: 10px;
+    border-radius: 2px;
+  }
+
+  /* ── SCATTER BUBBLE ── */
+  .scatter-bubble {
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .scatter-bubble:hover { opacity: 0.8; }
+
+  .axis-label {
+    font-family: 'Space Mono', monospace;
+    fill: rgba(0,0,0,0.3);
+    font-size: 9px;
+  }
+</style>
+</head>
+<body>
+<div class="dashboard">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-brand">MKT Analytics</div>
+      <div class="topbar-divider"></div>
+      <div class="topbar-title">Marketing Performance Dashboard</div>
+    </div>
+    <div class="topbar-right">
+      <div class="filter-pill">
+        📅
+        <select>
+          <option>Last 90 Days</option>
+          <option>Last 30 Days</option>
+          <option>Last 7 Days</option>
+          <option>YTD</option>
+        </select>
+      </div>
+      <div class="filter-pill">
+        📡
+        <select>
+          <option>All Channels</option>
+          <option>Paid Search</option>
+          <option>Social Media</option>
+          <option>Display</option>
+          <option>Email</option>
+          <option>Organic</option>
+        </select>
+      </div>
+      <div class="filter-pill">
+        🎯
+        <select>
+          <option>All Campaigns</option>
+          <option>Summer Push</option>
+          <option>Retargeting</option>
+          <option>Brand Awareness</option>
+        </select>
+      </div>
+      <div class="filter-pill">
+        🌍
+        <select>
+          <option>All Regions</option>
+          <option>North America</option>
+          <option>Europe</option>
+          <option>APAC</option>
+        </select>
+      </div>
+      <button class="export-btn">↗ Export PNG</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <div>
+        <h1>Campaign <span>Performance</span></h1>
+        <div style="font-size:13px;color:var(--text3);margin-top:6px;font-weight:500;">
+          Efficiency · Acquisition · ROAS Analysis — Q4 2024
+        </div>
+      </div>
+      <div class="page-header-meta">
+        <div class="period-badge">OCT — DEC 2024</div>
+        <div class="update-info">Last sync: Today, 08:15 AM<br>Source: fact_campaign_daily</div>
+      </div>
+    </div>
+
+    <!-- KPI ROW -->
+    <div class="kpi-row">
+      <div class="kpi-card featured">
+        <div class="kpi-label">Total Spend</div>
+        <div class="kpi-value">$842K</div>
+        <div class="kpi-footer">
+          <span class="kpi-delta" style="background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.7);">↑ 22% QoQ</span>
+          <span class="kpi-sub">$7.0M YTD</span>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Impressions</div>
+        <div class="kpi-value">48.3M</div>
+        <div class="kpi-footer">
+          <span class="kpi-delta delta-pos">↑ 31%</span>
+          <span class="kpi-sub">vs Q3</span>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">CTR</div>
+        <div class="kpi-value">3.84%</div>
+        <div class="kpi-footer">
+          <span class="kpi-delta delta-pos">↑ 0.6pp</span>
+          <span class="kpi-sub">bench: 2.1%</span>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">CAC</div>
+        <div class="kpi-value">$38.40</div>
+        <div class="kpi-footer">
+          <span class="kpi-delta delta-pos">↓ $4.20</span>
+          <span class="kpi-sub">target: &lt;$42</span>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Conv. Rate</div>
+        <div class="kpi-value">6.7%</div>
+        <div class="kpi-footer">
+          <span class="kpi-delta delta-pos">↑ 1.1pp</span>
+          <span class="kpi-sub">21,927 total</span>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">ROAS</div>
+        <div class="kpi-value">4.2×</div>
+        <div class="kpi-footer">
+          <span class="kpi-delta delta-pos">↑ 0.4×</span>
+          <span class="kpi-sub">target: 3.5×</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION LABEL -->
+    <div class="section-label">Channel & Campaign Analysis</div>
+
+    <!-- MAIN GRID: TABLE + SCATTER -->
+    <div class="main-grid">
+
+      <!-- Channel Performance Table -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Channel Performance Breakdown</div>
+            <div class="card-subtitle">Spend · Conversions · CAC · ROAS · Q4 2024</div>
+          </div>
+          <div class="tag">6 channels</div>
+        </div>
+        <table class="channel-table">
+          <thead>
+            <tr>
+              <th>Channel</th>
+              <th>Spend</th>
+              <th>Conv.</th>
+              <th>CTR</th>
+              <th>CAC</th>
+              <th>ROAS</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="ch-name"><div class="ch-dot" style="background:#1a4fd6;"></div>Paid Search</div></td>
+              <td>$312K</td>
+              <td>8,940</td>
+              <td class="val-good">5.2%</td>
+              <td class="val-good">$34.90</td>
+              <td>
+                <div class="roas-bar">
+                  <div class="roas-track"><div class="roas-fill" style="width:94%;"></div></div>
+                  <span class="val-good">4.8×</span>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><div class="ch-name"><div class="ch-dot" style="background:#7c3aed;"></div>Social Media</div></td>
+              <td>$218K</td>
+              <td>5,812</td>
+              <td class="val-good">4.1%</td>
+              <td>$37.50</td>
+              <td>
+                <div class="roas-bar">
+                  <div class="roas-track"><div class="roas-fill" style="width:82%;"></div></div>
+                  <span class="val-good">4.3×</span>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><div class="ch-name"><div class="ch-dot" style="background:#0891b2;"></div>Email</div></td>
+              <td>$64K</td>
+              <td>3,420</td>
+              <td class="val-good">6.8%</td>
+              <td class="val-good">$18.70</td>
+              <td>
+                <div class="roas-bar">
+                  <div class="roas-track"><div class="roas-fill" style="width:100%;background:#0891b2;"></div></div>
+                  <span class="val-good">6.1×</span>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><div class="ch-name"><div class="ch-dot" style="background:#1a7a4a;"></div>Organic</div></td>
+              <td>$22K</td>
+              <td>2,108</td>
+              <td>3.2%</td>
+              <td class="val-good">$10.40</td>
+              <td>
+                <div class="roas-bar">
+                  <div class="roas-track"><div class="roas-fill" style="width:100%;background:#1a7a4a;"></div></div>
+                  <span class="val-good">∞</span>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><div class="ch-name"><div class="ch-dot" style="background:#f07328;"></div>Display</div></td>
+              <td>$148K</td>
+              <td>1,214</td>
+              <td class="val-mid">1.8%</td>
+              <td class="val-bad">$121.9</td>
+              <td>
+                <div class="roas-bar">
+                  <div class="roas-track"><div class="roas-fill" style="width:36%;background:#f07328;"></div></div>
+                  <span class="val-mid">1.9×</span>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><div class="ch-name"><div class="ch-dot" style="background:#d4a017;"></div>Affiliate</div></td>
+              <td>$78K</td>
+              <td>433</td>
+              <td class="val-bad">0.9%</td>
+              <td class="val-bad">$180.1</td>
+              <td>
+                <div class="roas-bar">
+                  <div class="roas-track"><div class="roas-fill" style="width:18%;background:#d4a017;"></div></div>
+                  <span class="val-bad">0.9×</span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);display:flex;gap:16px;">
+          <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text3);">
+            🟢 ROAS &gt; 3.5× — <strong style="color:var(--green)">4 channels</strong>
+          </div>
+          <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text3);">
+            🔴 Underperforming — <strong style="color:var(--red)">Display, Affiliate</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Spend vs Conversions Scatter Plot -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Spend vs Conversions</div>
+            <div class="card-subtitle">Bubble size = ROAS · by channel</div>
+          </div>
+          <div class="legend" style="flex-direction:column;gap:5px;">
+            <div class="legend-item"><div class="legend-swatch" style="background:#1a4fd6;"></div>Paid Search</div>
+            <div class="legend-item"><div class="legend-swatch" style="background:#7c3aed;"></div>Social</div>
+            <div class="legend-item"><div class="legend-swatch" style="background:#0891b2;"></div>Email</div>
+            <div class="legend-item"><div class="legend-swatch" style="background:#f07328;"></div>Display</div>
+          </div>
+        </div>
+        <div class="scatter-area">
+          <svg viewBox="0 0 380 220" xmlns="http://www.w3.org/2000/svg">
+            <!-- Grid -->
+            <line x1="40" y1="10" x2="40" y2="185" stroke="rgba(0,0,0,0.06)" stroke-width="1"/>
+            <line x1="40" y1="185" x2="370" y2="185" stroke="rgba(0,0,0,0.06)" stroke-width="1"/>
+            <line x1="40" y1="140" x2="370" y2="140" stroke="rgba(0,0,0,0.05)" stroke-width="1" stroke-dasharray="3,3"/>
+            <line x1="40" y1="95" x2="370" y2="95" stroke="rgba(0,0,0,0.05)" stroke-width="1" stroke-dasharray="3,3"/>
+            <line x1="40" y1="50" x2="370" y2="50" stroke="rgba(0,0,0,0.05)" stroke-width="1" stroke-dasharray="3,3"/>
+            <line x1="135" y1="10" x2="135" y2="185" stroke="rgba(0,0,0,0.05)" stroke-width="1" stroke-dasharray="3,3"/>
+            <line x1="230" y1="10" x2="230" y2="185" stroke="rgba(0,0,0,0.05)" stroke-width="1" stroke-dasharray="3,3"/>
+            <line x1="325" y1="10" x2="325" y2="185" stroke="rgba(0,0,0,0.05)" stroke-width="1" stroke-dasharray="3,3"/>
+
+            <!-- Trend line -->
+            <line x1="55" y1="172" x2="355" y2="38" stroke="rgba(0,0,0,0.08)" stroke-width="1.5" stroke-dasharray="5,4"/>
+
+            <!-- Axis labels -->
+            <text x="200" y="205" class="axis-label" text-anchor="middle">Spend ($K)</text>
+            <text x="14" y="100" class="axis-label" text-anchor="middle" transform="rotate(-90,14,100)">Conversions</text>
+
+            <!-- Tick labels X -->
+            <text x="40" y="197" class="axis-label" text-anchor="middle">$0</text>
+            <text x="135" y="197" class="axis-label" text-anchor="middle">$80K</text>
+            <text x="230" y="197" class="axis-label" text-anchor="middle">$160K</text>
+            <text x="325" y="197" class="axis-label" text-anchor="middle">$240K</text>
+
+            <!-- Tick labels Y -->
+            <text x="36" y="188" class="axis-label" text-anchor="end">0</text>
+            <text x="36" y="143" class="axis-label" text-anchor="end">2K</text>
+            <text x="36" y="98" class="axis-label" text-anchor="end">5K</text>
+            <text x="36" y="53" class="axis-label" text-anchor="end">9K</text>
+
+            <!-- Bubbles: x=spend, y=conversions, r=ROAS -->
+            <!-- Paid Search: spend=$312K (off-right), conv=8940 (high) — let's scale to visible -->
+            <!-- Scale: x: $0=40 -> $320K=360, so $312K ≈ 355; y: 0=185 -> 9500=15, so 8940≈26 -->
+            <!-- Paid Search -->
+            <circle class="scatter-bubble" cx="352" cy="25" r="22" fill="#1a4fd6" fill-opacity="0.18" stroke="#1a4fd6" stroke-width="2"/>
+            <text x="352" y="29" fill="#1a4fd6" font-size="9" font-family="Space Mono, monospace" text-anchor="middle" font-weight="700">SEM</text>
+
+            <!-- Social: $218K, 5812 -->
+            <!-- x: 218/320*320+40 = 258, y: 185-(5812/9500)*170=185-104=81 -->
+            <circle class="scatter-bubble" cx="254" cy="82" r="18" fill="#7c3aed" fill-opacity="0.18" stroke="#7c3aed" stroke-width="2"/>
+            <text x="254" y="86" fill="#7c3aed" font-size="9" font-family="Space Mono, monospace" text-anchor="middle" font-weight="700">SOC</text>
+
+            <!-- Email: $64K, 3420 -->
+            <!-- x: 64/320*320+40=104, y: 185-(3420/9500)*170=185-61=124 -->
+            <circle class="scatter-bubble" cx="104" cy="123" r="14" fill="#0891b2" fill-opacity="0.18" stroke="#0891b2" stroke-width="2"/>
+            <text x="104" y="127" fill="#0891b2" font-size="9" font-family="Space Mono, monospace" text-anchor="middle" font-weight="700">EML</text>
+
+            <!-- Display: $148K, 1214 -->
+            <!-- x: 148/320*320+40=188, y: 185-(1214/9500)*170=185-22=163 -->
+            <circle class="scatter-bubble" cx="188" cy="160" r="10" fill="#f07328" fill-opacity="0.2" stroke="#f07328" stroke-width="2"/>
+            <text x="188" y="164" fill="#f07328" font-size="8" font-family="Space Mono, monospace" text-anchor="middle" font-weight="700">DSP</text>
+
+            <!-- Affiliate: $78K, 433 -->
+            <!-- x: 78/320*320+40=118, y: 185-(433/9500)*170=185-8=177 -->
+            <circle class="scatter-bubble" cx="120" cy="175" r="7" fill="#d4a017" fill-opacity="0.25" stroke="#d4a017" stroke-width="2"/>
+            <text x="120" y="179" fill="#d4a017" font-size="7" font-family="Space Mono, monospace" text-anchor="middle" font-weight="700">AFF</text>
+
+            <!-- Organic: $22K, 2108 -->
+            <!-- x: 22/320*320+40=62, y: 185-(2108/9500)*170=185-38=147 -->
+            <circle class="scatter-bubble" cx="62" cy="147" r="10" fill="#1a7a4a" fill-opacity="0.2" stroke="#1a7a4a" stroke-width="2"/>
+            <text x="62" y="151" fill="#1a7a4a" font-size="8" font-family="Space Mono, monospace" text-anchor="middle" font-weight="700">ORG</text>
+
+            <!-- Ideal quadrant label -->
+            <text x="290" y="60" fill="rgba(26,122,74,0.5)" font-size="9" font-family="Space Mono, monospace" text-anchor="middle">HIGH CONV</text>
+            <text x="290" y="70" fill="rgba(26,122,74,0.5)" font-size="9" font-family="Space Mono, monospace" text-anchor="middle">✓ IDEAL</text>
+          </svg>
+        </div>
+        <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text3);margin-top:4px;text-align:center;">
+          Top-right quadrant = high spend efficiency
+        </div>
+      </div>
+
+    </div>
+
+    <!-- SECTION LABEL -->
+    <div class="section-label">Funnel · Trend · Campaigns</div>
+
+    <!-- BOTTOM GRID -->
+    <div class="bottom-grid">
+
+      <!-- Campaign Weekly Trend -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Weekly Campaign Trend</div>
+            <div class="card-subtitle">Conversions by channel · W1–W13</div>
+          </div>
+          <div class="legend">
+            <div class="legend-item"><div class="legend-swatch" style="background:#1a4fd6;"></div>SEM</div>
+            <div class="legend-item"><div class="legend-swatch" style="background:#7c3aed;"></div>Social</div>
+            <div class="legend-item"><div class="legend-swatch" style="background:#0891b2;"></div>Email</div>
+          </div>
+        </div>
+        <div class="trend-area">
+          <svg viewBox="0 0 380 160" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="semGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#1a4fd6" stop-opacity="0.2"/>
+                <stop offset="100%" stop-color="#1a4fd6" stop-opacity="0"/>
+              </linearGradient>
+              <linearGradient id="socGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#7c3aed" stop-opacity="0.15"/>
+                <stop offset="100%" stop-color="#7c3aed" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+
+            <!-- Grid -->
+            <line x1="0" y1="40" x2="380" y2="40" stroke="rgba(0,0,0,0.04)" stroke-width="1"/>
+            <line x1="0" y1="80" x2="380" y2="80" stroke="rgba(0,0,0,0.04)" stroke-width="1"/>
+            <line x1="0" y1="120" x2="380" y2="120" stroke="rgba(0,0,0,0.04)" stroke-width="1"/>
+
+            <!-- SEM area + line -->
+            <path d="M0,118 C20,112 40,105 60,98 C80,91 100,84 120,78 C140,72 160,65 180,58 C200,51 220,47 240,42 C260,37 280,34 300,30 C320,26 340,23 360,20 C370,18 376,17 380,16 L380,160 L0,160Z"
+                  fill="url(#semGrad)"/>
+            <path d="M0,118 C20,112 40,105 60,98 C80,91 100,84 120,78 C140,72 160,65 180,58 C200,51 220,47 240,42 C260,37 280,34 300,30 C320,26 340,23 360,20 C370,18 376,17 380,16"
+                  fill="none" stroke="#1a4fd6" stroke-width="2" stroke-linecap="round"/>
+
+            <!-- Social area + line -->
+            <path d="M0,132 C20,128 40,124 60,120 C80,116 100,112 120,108 C140,104 160,98 180,92 C200,86 220,82 240,79 C260,76 280,73 300,70 C320,67 340,64 360,62 L380,60 L380,160 L0,160Z"
+                  fill="url(#socGrad)"/>
+            <path d="M0,132 C20,128 40,124 60,120 C80,116 100,112 120,108 C140,104 160,98 180,92 C200,86 220,82 240,79 C260,76 280,73 300,70 C320,67 340,64 360,62 L380,60"
+                  fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round"/>
+
+            <!-- Email dashed line -->
+            <path d="M0,145 C30,143 60,140 90,137 C120,134 150,130 180,126 C210,122 240,120 270,118 C300,116 330,114 360,113 L380,112"
+                  fill="none" stroke="#0891b2" stroke-width="1.5" stroke-dasharray="4,3" stroke-linecap="round"/>
+
+            <!-- Week labels -->
+            <text x="0" y="157" class="axis-label">W1</text>
+            <text x="93" y="157" class="axis-label">W4</text>
+            <text x="188" y="157" class="axis-label">W7</text>
+            <text x="282" y="157" class="axis-label">W10</text>
+            <text x="362" y="157" class="axis-label">W13</text>
+
+            <!-- Annotation -->
+            <rect x="155" y="48" width="72" height="18" rx="3" fill="#1a4fd6" fill-opacity="0.1" stroke="#1a4fd6" stroke-opacity="0.3" stroke-width="1"/>
+            <text x="191" y="60" fill="#1a4fd6" font-size="8.5" font-family="Space Mono, monospace" text-anchor="middle" font-weight="700">+38% W7↑</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Conversion Funnel -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Conversion Funnel</div>
+            <div class="card-subtitle">Impressions → Purchase · Q4 2024</div>
+          </div>
+          <div class="tag">4 stages</div>
+        </div>
+        <div class="funnel-wrap">
+
+          <div class="funnel-stage">
+            <div class="funnel-bar-wrap">
+              <div class="funnel-bar-label">
+                <span class="funnel-stage-name">👁 Impressions</span>
+                <span class="funnel-stage-val">48,300,000</span>
+              </div>
+              <div class="funnel-track">
+                <div class="funnel-fill" style="width:100%;background:linear-gradient(90deg,#1a4fd6,#7c3aed);">
+                  100%
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--text3);margin-left:4px;display:flex;align-items:center;gap:4px;">
+            <span style="color:var(--green);">▼</span> 3.84% click-through
+          </div>
+
+          <div class="funnel-stage">
+            <div class="funnel-bar-wrap">
+              <div class="funnel-bar-label">
+                <span class="funnel-stage-name">🖱 Clicks</span>
+                <span class="funnel-stage-val">1,854,720</span>
+              </div>
+              <div class="funnel-track">
+                <div class="funnel-fill" style="width:56%;background:linear-gradient(90deg,#7c3aed,#0891b2);">
+                  3.84%
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--text3);margin-left:4px;display:flex;align-items:center;gap:4px;">
+            <span style="color:var(--green);">▼</span> 1.76% signup rate
+          </div>
+
+          <div class="funnel-stage">
+            <div class="funnel-bar-wrap">
+              <div class="funnel-bar-label">
+                <span class="funnel-stage-name">✍ Sign-Ups</span>
+                <span class="funnel-stage-val">32,643</span>
+              </div>
+              <div class="funnel-track">
+                <div class="funnel-fill" style="width:35%;background:linear-gradient(90deg,#0891b2,#1a7a4a);">
+                  0.068%
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--text3);margin-left:4px;display:flex;align-items:center;gap:4px;">
+            <span style="color:var(--green);">▼</span> 67.2% purchase rate
+          </div>
+
+          <div class="funnel-stage">
+            <div class="funnel-bar-wrap">
+              <div class="funnel-bar-label">
+                <span class="funnel-stage-name">💳 Purchases</span>
+                <span class="funnel-stage-val">21,927</span>
+              </div>
+              <div class="funnel-track">
+                <div class="funnel-fill" style="width:22%;background:linear-gradient(90deg,#1a7a4a,#1a7a4a);">
+                  0.045%
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:12px;padding:10px 12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border2);">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--text3);">Overall funnel efficiency</div>
+              <div style="font-family:'Space Mono',monospace;font-size:11px;font-weight:700;color:var(--green);">0.045%</div>
+            </div>
+            <div style="margin-top:6px;height:5px;background:var(--surface3);border-radius:3px;overflow:hidden;">
+              <div style="width:45%;height:100%;background:linear-gradient(90deg,#1a4fd6,#1a7a4a);border-radius:3px;"></div>
+            </div>
+            <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--text3);margin-top:4px;">Biggest drop: Clicks → Signups (↓98.2%)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top & Bottom Campaigns -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Campaign Rankings</div>
+            <div class="card-subtitle">By ROAS · Top 4 & Bottom 4</div>
+          </div>
+          <div class="tag">ROAS metric</div>
+        </div>
+
+        <div class="campaign-list">
+          <div class="divider-label">🏆 Top Performers</div>
+
+          <div class="campaign-item">
+            <div class="campaign-rank">#1</div>
+            <div class="campaign-name-wrap">
+              <div class="campaign-name">Summer Retargeting Pro</div>
+              <div class="campaign-channel">Email · North America</div>
+            </div>
+            <div class="campaign-bar-wrap">
+              <div class="campaign-track"><div class="campaign-fill" style="width:100%;background:#1a7a4a;"></div></div>
+            </div>
+            <div class="campaign-val" style="color:var(--green);">7.8×</div>
+          </div>
+
+          <div class="campaign-item">
+            <div class="campaign-rank">#2</div>
+            <div class="campaign-name-wrap">
+              <div class="campaign-name">Q4 Brand Awareness</div>
+              <div class="campaign-channel">Paid Search · Europe</div>
+            </div>
+            <div class="campaign-bar-wrap">
+              <div class="campaign-track"><div class="campaign-fill" style="width:85%;background:#1a4fd6;"></div></div>
+            </div>
+            <div class="campaign-val" style="color:var(--blue);">6.6×</div>
+          </div>
+
+          <div class="campaign-item">
+            <div class="campaign-rank">#3</div>
+            <div class="campaign-name-wrap">
+              <div class="campaign-name">Lookalike Expansion</div>
+              <div class="campaign-channel">Social · APAC</div>
+            </div>
+            <div class="campaign-bar-wrap">
+              <div class="campaign-track"><div class="campaign-fill" style="width:72%;background:#7c3aed;"></div></div>
+            </div>
+            <div class="campaign-val" style="color:var(--purple);">5.6×</div>
+          </div>
+
+          <div class="campaign-item">
+            <div class="campaign-rank">#4</div>
+            <div class="campaign-name-wrap">
+              <div class="campaign-name">Holiday Flash Sale</div>
+              <div class="campaign-channel">Email · North America</div>
+            </div>
+            <div class="campaign-bar-wrap">
+              <div class="campaign-track"><div class="campaign-fill" style="width:62%;background:#0891b2;"></div></div>
+            </div>
+            <div class="campaign-val" style="color:var(--teal);">4.8×</div>
+          </div>
+
+          <div class="divider-label" style="color:var(--red);">⚠ Underperforming</div>
+
+          <div class="campaign-item">
+            <div class="campaign-rank" style="color:var(--red);">#21</div>
+            <div class="campaign-name-wrap">
+              <div class="campaign-name">Display Prospecting v2</div>
+              <div class="campaign-channel">Display · LATAM</div>
+            </div>
+            <div class="campaign-bar-wrap">
+              <div class="campaign-track"><div class="campaign-fill" style="width:28%;background:#f07328;"></div></div>
+            </div>
+            <div class="campaign-val" style="color:var(--orange);">2.1×</div>
+          </div>
+
+          <div class="campaign-item">
+            <div class="campaign-rank" style="color:var(--red);">#22</div>
+            <div class="campaign-name-wrap">
+              <div class="campaign-name">Affiliate Blog Network</div>
+              <div class="campaign-channel">Affiliate · MEA</div>
+            </div>
+            <div class="campaign-bar-wrap">
+              <div class="campaign-track"><div class="campaign-fill" style="width:18%;background:#d4a017;"></div></div>
+            </div>
+            <div class="campaign-val" style="color:var(--gold);">1.3×</div>
+          </div>
+
+          <div class="campaign-item">
+            <div class="campaign-rank" style="color:var(--red);">#23</div>
+            <div class="campaign-name-wrap">
+              <div class="campaign-name">Broad Match Generic</div>
+              <div class="campaign-channel">Paid Search · APAC</div>
+            </div>
+            <div class="campaign-bar-wrap">
+              <div class="campaign-track"><div class="campaign-fill" style="width:12%;background:#e8390e;"></div></div>
+            </div>
+            <div class="campaign-val" style="color:var(--red);">0.9×</div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div class="dash-footer">
+      <div>
+        <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--text3);margin-bottom:6px;letter-spacing:1px;text-transform:uppercase;">Data Sources</div>
+        <div class="footer-tables">
+          <div class="table-tag">fact_campaign_daily</div>
+          <div class="table-tag">fact_funnel_events</div>
+          <div class="table-tag">dim_campaign</div>
+          <div class="table-tag">dim_channel</div>
+          <div class="table-tag">dim_date</div>
+        </div>
+      </div>
+      <div class="footer-right" style="text-align:right;">
+        Marketing Performance Dashboard · Page 1 of 1<br>
+        <span style="color:var(--text3);">DAX measures: CAC = Spend/Conversions · ROAS = Revenue/Spend</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

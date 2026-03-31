@@ -1,0 +1,179 @@
+user_id,event_time,channel,event_name,variant
+20001,2026-04-27T09:35:19,Paid Social,visit,B
+20001,2026-04-27T10:43:19,Paid Social,signup,B
+20001,2026-04-27T22:43:19,Paid Social,activation,B
+20002,2026-04-14T01:45:57,Search,visit,B
+20003,2026-04-06T00:11:11,Email,visit,A
+20003,2026-04-06T02:52:11,Email,signup,A
+20004,2026-02-11T06:44:42,Search,visit,B
+20004,2026-02-11T09:38:42,Search,signup,B
+20004,2026-02-13T05:38:42,Search,activation,B
+20005,2026-04-13T15:59:45,Email,visit,A
+20006,2026-03-20T04:21:28,Paid Social,visit,A
+20006,2026-03-20T06:48:28,Paid Social,signup,A
+20006,2026-03-21T09:48:28,Paid Social,activation,A
+20007,2026-04-14T18:03:54,Email,visit,B
+20007,2026-04-14T20:20:54,Email,signup,B
+20008,2026-03-11T10:11:12,Email,visit,B
+20008,2026-03-11T10:57:12,Email,signup,B
+20009,2026-02-04T11:47:40,Search,visit,B
+20010,2026-01-05T12:36:13,Paid Social,visit,A
+20010,2026-01-05T15:36:13,Paid Social,signup,A
+20011,2026-01-17T16:52:37,Email,visit,A
+20011,2026-01-17T19:35:37,Email,signup,A
+20011,2026-01-19T14:35:37,Email,activation,A
+20012,2026-02-08T23:46:11,Search,visit,A
+20013,2026-03-28T00:24:09,Search,visit,A
+20013,2026-03-28T02:12:09,Search,signup,A
+20014,2026-04-03T10:59:20,Paid Social,visit,A
+20015,2026-04-27T10:39:20,Search,visit,A
+20016,2026-03-21T06:48:48,Search,visit,A
+20016,2026-03-21T07:23:48,Search,signup,A
+20016,2026-03-22T06:23:48,Search,activation,A
+20017,2026-02-10T07:23:23,Paid Social,visit,A
+20018,2026-02-15T10:04:52,Search,visit,B
+20019,2026-03-12T05:39:22,Email,visit,A
+20019,2026-03-12T06:02:22,Email,signup,A
+20020,2026-01-10T06:11:38,Search,visit,A
+20021,2026-03-19T13:23:09,Paid Social,visit,B
+20022,2026-02-05T04:34:18,Search,visit,B
+20023,2026-03-19T09:31:00,Search,visit,B
+20024,2026-02-13T21:26:59,Paid Social,visit,A
+20025,2026-03-02T23:01:59,Paid Social,visit,B
+20025,2026-03-03T01:58:59,Paid Social,signup,B
+20026,2026-01-16T13:25:09,Paid Social,visit,B
+20027,2026-02-19T18:02:13,Email,visit,B
+20027,2026-02-19T19:22:13,Email,signup,B
+20028,2026-04-14T13:05:51,Search,visit,B
+20028,2026-04-14T14:15:51,Search,signup,B
+20029,2026-04-29T15:29:00,Paid Social,visit,B
+20029,2026-04-29T17:11:00,Paid Social,signup,B
+20030,2026-03-07T09:49:16,Paid Social,visit,B
+20031,2026-03-10T23:46:03,Paid Social,visit,B
+20032,2026-02-03T07:59:17,Email,visit,A
+20033,2026-02-14T21:38:26,Search,visit,B
+20034,2026-01-01T16:51:44,Search,visit,B
+20034,2026-01-01T19:12:44,Search,signup,B
+20034,2026-01-04T14:12:44,Search,activation,B
+20035,2026-02-02T11:57:09,Email,visit,B
+20036,2026-02-21T05:53:36,Email,visit,B
+20037,2026-04-14T02:47:02,Paid Social,visit,B
+20038,2026-01-05T00:05:08,Paid Social,visit,B
+20039,2026-01-07T04:56:54,Paid Social,visit,B
+20040,2026-04-19T04:52:26,Paid Social,visit,B
+20041,2026-01-20T10:33:12,Paid Social,visit,B
+20042,2026-02-03T10:45:24,Paid Social,visit,B
+20043,2026-01-26T08:56:11,Paid Social,visit,B
+20044,2026-02-04T17:25:37,Paid Social,visit,B
+20045,2026-04-22T04:48:21,Paid Social,visit,A
+20046,2026-04-04T01:06:37,Paid Social,visit,B
+20047,2026-01-15T12:20:19,Search,visit,B
+20048,2026-01-23T07:19:14,Search,visit,B
+20049,2026-01-01T18:21:51,Paid Social,visit,B
+20050,2026-04-24T04:43:03,Search,visit,B
+20051,2026-04-25T04:56:40,Paid Social,visit,B
+20052,2026-03-08T11:39:06,Paid Social,visit,B
+20053,2026-03-27T06:15:57,Paid Social,visit,B
+20053,2026-03-27T08:06:57,Paid Social,signup,B
+20053,2026-03-28T09:06:57,Paid Social,activation,B
+20054,2026-02-22T23:20:48,Paid Social,visit,A
+20055,2026-02-08T11:51:54,Paid Social,visit,B
+20056,2026-04-14T21:03:33,Search,visit,A
+20056,2026-04-15T00:01:33,Search,signup,A
+20056,2026-04-15T17:01:33,Search,activation,A
+20057,2026-01-17T19:09:32,Paid Social,visit,A
+20057,2026-01-17T21:25:32,Paid Social,signup,A
+20058,2026-02-14T23:07:53,Paid Social,visit,A
+20059,2026-01-11T06:07:10,Paid Social,visit,A
+20060,2026-02-04T20:52:55,Paid Social,visit,B
+20061,2026-04-12T05:09:38,Paid Social,visit,A
+20062,2026-01-19T19:53:45,Paid Social,visit,A
+20063,2026-04-27T23:38:40,Search,visit,A
+20064,2026-02-01T08:19:59,Email,visit,A
+20065,2026-03-14T10:50:47,Search,visit,A
+20065,2026-03-14T13:25:47,Search,signup,A
+20065,2026-03-16T16:25:47,Search,activation,A
+20066,2026-01-31T20:11:31,Paid Social,visit,A
+20066,2026-01-31T20:18:31,Paid Social,signup,A
+20067,2026-04-06T14:57:08,Paid Social,visit,B
+20068,2026-02-01T20:05:00,Paid Social,visit,A
+20069,2026-03-05T11:43:12,Search,visit,B
+20070,2026-02-22T13:26:00,Paid Social,visit,A
+20071,2026-01-04T14:24:33,Search,visit,A
+20072,2026-03-23T09:08:53,Search,visit,B
+20073,2026-03-20T21:24:04,Paid Social,visit,A
+20074,2026-02-20T10:47:14,Paid Social,visit,A
+20074,2026-02-20T13:17:14,Paid Social,signup,A
+20074,2026-02-20T14:17:14,Paid Social,activation,A
+20075,2026-01-26T14:01:26,Search,visit,A
+20076,2026-01-12T21:32:47,Search,visit,A
+20077,2026-03-25T14:52:33,Paid Social,visit,B
+20077,2026-03-25T17:41:33,Paid Social,signup,B
+20077,2026-03-27T20:41:33,Paid Social,activation,B
+20078,2026-04-25T05:20:26,Paid Social,visit,B
+20079,2026-04-29T21:09:41,Paid Social,visit,B
+20079,2026-04-29T23:22:41,Paid Social,signup,B
+20079,2026-05-02T14:22:41,Paid Social,activation,B
+20080,2026-01-20T12:09:47,Search,visit,A
+20081,2026-02-03T16:55:59,Email,visit,A
+20081,2026-02-03T18:03:59,Email,signup,A
+20081,2026-02-05T03:03:59,Email,activation,A
+20082,2026-04-08T23:08:46,Search,visit,A
+20083,2026-04-12T20:18:05,Paid Social,visit,A
+20084,2026-04-20T00:19:31,Paid Social,visit,B
+20084,2026-04-20T01:28:31,Paid Social,signup,B
+20084,2026-04-21T20:28:31,Paid Social,activation,B
+20085,2026-01-06T17:56:48,Paid Social,visit,B
+20086,2026-02-06T19:42:33,Paid Social,visit,B
+20087,2026-02-19T11:59:46,Paid Social,visit,B
+20087,2026-02-19T14:19:46,Paid Social,signup,B
+20087,2026-02-21T13:19:46,Paid Social,activation,B
+20088,2026-03-17T13:58:53,Paid Social,visit,A
+20088,2026-03-17T15:21:53,Paid Social,signup,A
+20089,2026-01-06T06:50:38,Paid Social,visit,A
+20090,2026-03-15T17:00:52,Search,visit,A
+20090,2026-03-15T18:26:52,Search,signup,A
+20091,2026-01-15T09:08:59,Search,visit,A
+20091,2026-01-15T09:58:59,Search,signup,A
+20091,2026-01-17T05:58:59,Search,activation,A
+20092,2026-01-14T16:21:39,Search,visit,B
+20093,2026-03-26T15:11:46,Paid Social,visit,B
+20093,2026-03-26T16:50:46,Paid Social,signup,B
+20094,2026-02-21T00:50:45,Search,visit,B
+20095,2026-02-23T01:32:08,Search,visit,B
+20096,2026-02-12T15:54:17,Email,visit,A
+20096,2026-02-12T18:37:17,Email,signup,A
+20096,2026-02-14T10:37:17,Email,activation,A
+20097,2026-03-28T08:28:14,Paid Social,visit,A
+20098,2026-03-16T10:52:59,Paid Social,visit,B
+20098,2026-03-16T11:01:59,Paid Social,signup,B
+20098,2026-03-18T20:01:59,Paid Social,activation,B
+20099,2026-03-04T07:29:51,Search,visit,B
+20100,2026-04-14T19:20:51,Search,visit,A
+20101,2026-03-19T08:34:03,Email,visit,A
+20102,2026-02-24T07:52:30,Search,visit,A
+20103,2026-04-26T14:33:51,Paid Social,visit,B
+20103,2026-04-26T14:43:51,Paid Social,signup,B
+20103,2026-04-27T01:43:51,Paid Social,activation,B
+20104,2026-02-07T08:31:16,Email,visit,A
+20105,2026-03-04T05:16:50,Paid Social,visit,A
+20106,2026-03-25T10:37:04,Paid Social,visit,A
+20107,2026-01-27T04:22:54,Paid Social,visit,B
+20108,2026-03-22T15:46:14,Email,visit,B
+20108,2026-03-22T16:38:14,Email,signup,B
+20109,2026-01-16T02:03:05,Search,visit,B
+20109,2026-01-16T04:22:05,Search,signup,B
+20109,2026-01-17T01:22:05,Search,activation,B
+20110,2026-01-07T19:42:01,Search,visit,B
+20111,2026-03-17T22:55:27,Paid Social,visit,A
+20111,2026-03-18T00:14:27,Paid Social,signup,A
+20112,2026-04-08T09:40:19,Search,visit,A
+20113,2026-02-19T02:52:33,Paid Social,visit,B
+20114,2026-02-06T22:58:41,Paid Social,visit,B
+20115,2026-02-14T15:39:39,Search,visit,A
+20116,2026-03-26T11:21:17,Paid Social,visit,A
+20117,2026-03-19T14:02:12,Paid Social,visit,A
+20118,2026-01-18T04:04:54,Paid Social,visit,A
+20119,2026-02-07T21:14:38,Paid Social,visit,A
+20120,2026-02-28T00:07:51,Search,visit,A
+20120,2026-02-28T00:49:51,Search,signup,A

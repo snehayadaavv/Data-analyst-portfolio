@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Operations & Support Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0b0f0e;
+    --bg2: #0f1412;
+    --surface: #141a18;
+    --surface2: #1a2220;
+    --surface3: #202a28;
+    --border: rgba(255,255,255,0.06);
+    --border2: rgba(255,255,255,0.10);
+    --text: #e8f0ee;
+    --text2: #8aaba4;
+    --text3: #4a6560;
+    --green: #00d4a0;
+    --green2: #00a87e;
+    --red: #ff4d6a;
+    --amber: #ffb340;
+    --blue: #4d9eff;
+    --purple: #b46fff;
+    --teal: #00c9c9;
+    --dim: #3a5550;
+    --crit: #ff4d6a;
+    --high: #ffb340;
+    --med: #4d9eff;
+    --low: #00d4a0;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Scanline effect */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,212,160,0.008) 2px,
+      rgba(0,212,160,0.008) 4px
+    );
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  .dashboard {
+    max-width: 1440px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-rows: auto auto 1fr;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border2);
+    padding: 0 32px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-left { display: flex; align-items: center; gap: 20px; }
+
+  .sys-badge {
+    display: flex; align-items: center; gap: 8px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; font-weight: 600;
+    color: var(--green);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  .sys-icon {
+    width: 28px; height: 28px;
+    border: 1.5px solid var(--green);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    box-shadow: 0 0 10px rgba(0,212,160,0.2);
+  }
+
+  .header-sep {
+    width: 1px; height: 28px;
+    background: var(--border2);
+  }
+
+  .header-title {
+    font-size: 13px; color: var(--text2);
+    font-weight: 400; letter-spacing: 0.3px;
+  }
+
+  .header-right { display: flex; align-items: center; gap: 10px; }
+
+  .filter-chip {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; color: var(--text2);
+    cursor: pointer;
+  }
+
+  .filter-chip select {
+    background: transparent; border: none;
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; outline: none; cursor: pointer;
+  }
+
+  .filter-chip select option { background: var(--surface); }
+
+  .status-pill {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(0,212,160,0.08);
+    border: 1px solid rgba(0,212,160,0.2);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; color: var(--green);
+  }
+
+  .pulse-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+    animation: blink 1.8s ease-in-out infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* ── SUB-HEADER (KPI row) ── */
+  .kpi-strip {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+  }
+
+  .kpi-cell {
+    padding: 16px 20px;
+    border-right: 1px solid var(--border);
+    position: relative;
+    cursor: default;
+    transition: background 0.15s;
+  }
+
+  .kpi-cell:last-child { border-right: none; }
+  .kpi-cell:hover { background: var(--surface); }
+
+  .kpi-cell::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--cell-color, var(--green));
+    transform: scaleX(0);
+    transition: transform 0.3s;
+    transform-origin: left;
+  }
+
+  .kpi-cell:hover::before { transform: scaleX(1); }
+
+  .kpi-cell-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px; color: var(--text3);
+    letter-spacing: 1.2px; text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .kpi-cell-val {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 26px; font-weight: 600;
+    letter-spacing: -1px; line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .kpi-cell-footer {
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .delta-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px; font-weight: 600;
+    padding: 2px 6px; border-radius: 3px;
+  }
+
+  .dt-green { background: rgba(0,212,160,0.12); color: var(--green); }
+  .dt-red { background: rgba(255,77,106,0.12); color: var(--red); }
+  .dt-amber { background: rgba(255,179,64,0.12); color: var(--amber); }
+
+  .kpi-meta {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px; color: var(--text3);
+  }
+
+  /* SLA ring */
+  .sla-ring-wrap {
+    display: flex; align-items: center; gap: 10px;
+  }
+
+  .sla-ring {
+    position: relative; width: 38px; height: 38px; flex-shrink: 0;
+  }
+
+  .sla-ring svg { width: 38px; height: 38px; }
+
+  .sla-inner {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 8px; font-weight: 600;
+    color: var(--green);
+  }
+
+  /* ── MAIN LAYOUT ── */
+  .main {
+    padding: 20px 32px 32px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: auto auto auto;
+    gap: 16px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    overflow: hidden;
+  }
+
+  .card-header {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .card-title {
+    font-size: 12px; font-weight: 600;
+    color: var(--text); letter-spacing: 0.2px;
+    text-transform: uppercase;
+  }
+
+  .card-sub {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px; color: var(--text3);
+    margin-top: 3px; letter-spacing: 0.5px;
+  }
+
+  .mono-badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px; padding: 3px 8px;
+    border-radius: 3px;
+    border: 1px solid var(--border2);
+    color: var(--text3);
+    background: var(--surface2);
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+
+  /* ── TICKET TREND CHART ── */
+  .trend-svg { width: 100%; height: 160px; }
+
+  /* ── FUNNEL ── */
+  .funnel-stages { display: flex; flex-direction: column; gap: 8px; }
+
+  .fs-row {
+    display: grid;
+    grid-template-columns: 80px 1fr 64px;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .fs-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; color: var(--text2);
+    letter-spacing: 0.3px;
+  }
+
+  .fs-track {
+    height: 20px;
+    background: var(--surface3);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .fs-fill {
+    height: 100%; border-radius: 3px;
+    display: flex; align-items: center;
+    padding-left: 8px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px; font-weight: 600;
+    color: rgba(255,255,255,0.7);
+    white-space: nowrap;
+  }
+
+  .fs-val {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; font-weight: 600;
+    color: var(--text); text-align: right;
+  }
+
+  .fs-conv {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px; color: var(--text3);
+    grid-column: 2 / 4;
+    padding-left: 2px;
+  }
+
+  /* ── HEATMAP ── */
+  .heatmap-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .hm-row {
+    display: flex; align-items: center; gap: 4px;
+  }
+
+  .hm-row-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px; color: var(--text3);
+    width: 88px; flex-shrink: 0;
+    letter-spacing: 0.3px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .hm-cell {
+    flex: 1; height: 28px;
+    border-radius: 3px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px; font-weight: 600;
+    cursor: default;
+    transition: transform 0.15s;
+    border: 1px solid rgba(0,0,0,0.2);
+  }
+
+  .hm-cell:hover { transform: scale(1.05); z-index: 2; position: relative; }
+
+  .hm-header-row {
+    display: flex; align-items: center; gap: 4px;
+    margin-bottom: 4px;
+  }
+
+  .hm-col-label {
+    flex: 1; text-align: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px; color: var(--text3);
+    letter-spacing: 0.3px;
+  }
+
+  /* Heatmap color scale */
+  .hm-0  { background: rgba(0,212,160,0.08); color: rgba(0,212,160,0.4); }
+  .hm-1  { background: rgba(0,212,160,0.15); color: rgba(0,212,160,0.6); }
+  .hm-2  { background: rgba(0,201,201,0.20); color: var(--teal); }
+  .hm-3  { background: rgba(77,158,255,0.22); color: var(--blue); }
+  .hm-4  { background: rgba(255,179,64,0.22); color: var(--amber); }
+  .hm-5  { background: rgba(255,179,64,0.35); color: var(--amber); }
+  .hm-6  { background: rgba(255,77,106,0.25); color: var(--red); }
+  .hm-7  { background: rgba(255,77,106,0.40); color: var(--red); }
+  .hm-8  { background: rgba(255,77,106,0.60); color: #fff; }
+
+  /* ── AGENT LEADERBOARD ── */
+  .leaderboard { display: flex; flex-direction: column; gap: 6px; }
+
+  .agent-row {
+    display: grid;
+    grid-template-columns: 24px 1fr 52px 52px 48px;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    background: var(--surface2);
+    border: 1px solid transparent;
+    transition: border-color 0.15s;
+    cursor: default;
+  }
+
+  .agent-row:hover { border-color: var(--border2); }
+  .agent-row.top { background: rgba(0,212,160,0.06); border-color: rgba(0,212,160,0.15); }
+
+  .agent-rank {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; color: var(--text3);
+    text-align: center;
+  }
+
+  .agent-rank.gold { color: #ffd700; font-weight: 700; }
+  .agent-rank.silver { color: #c0c0c0; font-weight: 700; }
+  .agent-rank.bronze { color: #cd7f32; font-weight: 700; }
+
+  .agent-info {}
+
+  .agent-name {
+    font-size: 12px; font-weight: 600; color: var(--text);
+  }
+
+  .agent-team {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px; color: var(--text3);
+  }
+
+  .agent-stat {
+    text-align: right;
+  }
+
+  .agent-stat-val {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px; font-weight: 600; color: var(--text);
+    display: block;
+  }
+
+  .agent-stat-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 8px; color: var(--text3);
+    letter-spacing: 0.5px;
+  }
+
+  .sla-compliance {
+    display: flex; flex-direction: column; align-items: flex-end; gap: 2px;
+  }
+
+  .sla-pct {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; font-weight: 600;
+  }
+
+  .sla-bar {
+    width: 40px; height: 3px;
+    background: var(--surface3);
+    border-radius: 2px; overflow: hidden;
+  }
+
+  .sla-bar-fill {
+    height: 100%; border-radius: 2px;
+  }
+
+  /* ── LEADER HEADER ── */
+  .leaderboard-header {
+    display: grid;
+    grid-template-columns: 24px 1fr 52px 52px 48px;
+    gap: 10px;
+    padding: 0 10px 6px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 4px;
+  }
+
+  .lb-col {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 8px; color: var(--text3);
+    letter-spacing: 1px; text-transform: uppercase;
+    text-align: right;
+  }
+
+  .lb-col:nth-child(2) { text-align: left; }
+
+  /* ── BACKLOG RISK ── */
+  .backlog-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .backlog-stat {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+
+  .backlog-stat-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px; color: var(--text3);
+    letter-spacing: 0.8px; margin-bottom: 5px;
+  }
+
+  .backlog-stat-val {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 22px; font-weight: 600;
+    letter-spacing: -0.5px;
+  }
+
+  .backlog-bar-section { }
+
+  .backlog-bar-label {
+    display: flex; justify-content: space-between;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px; color: var(--text3);
+    margin-bottom: 5px;
+  }
+
+  .backlog-bar {
+    height: 8px; background: var(--surface3);
+    border-radius: 4px; overflow: hidden;
+    margin-bottom: 8px;
+  }
+
+  .backlog-fill {
+    height: 100%; border-radius: 4px;
+  }
+
+  .breach-list { display: flex; flex-direction: column; gap: 5px; margin-top: 8px; }
+
+  .breach-item {
+    display: flex; align-items: center; justify-content: space-between;
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    padding: 5px 8px;
+    border-radius: 4px;
+    background: var(--surface2);
+  }
+
+  .breach-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    margin-right: 6px; flex-shrink: 0;
+  }
+
+  .breach-id { color: var(--text3); }
+  .breach-age { font-weight: 600; }
+
+  /* ── RESIZE: Span cols ── */
+  .span-2 { grid-column: span 2; }
+  .span-3 { grid-column: span 3; }
+
+  /* ── FOOTER ── */
+  .footer {
+    padding: 14px 32px;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+    background: var(--bg2);
+  }
+
+  .footer-tables { display: flex; gap: 8px; }
+
+  .tbl-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px; padding: 3px 8px;
+    border: 1px solid var(--border2);
+    border-radius: 3px; color: var(--text3);
+    background: var(--surface2);
+  }
+
+  .footer-right {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px; color: var(--text3);
+    text-align: right;
+  }
+
+  /* ── CHART AXIS STYLE ── */
+  .ax { font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; fill: var(--text3); }
+  .grid-line { stroke: rgba(255,255,255,0.04); stroke-width: 1; }
+</style>
+</head>
+<body>
+<div class="dashboard">
+
+  <!-- ── HEADER ── -->
+  <div class="header">
+    <div class="header-left">
+      <div class="sys-badge">
+        <div class="sys-icon">⚙</div>
+        OPS CONSOLE
+      </div>
+      <div class="header-sep"></div>
+      <div class="header-title">Operations &amp; Support Dashboard — Q4 2024</div>
+    </div>
+    <div class="header-right">
+      <div class="filter-chip">📅
+        <select>
+          <option>This Week</option><option>Last 30 Days</option>
+          <option>Q4 2024</option><option>YTD</option>
+        </select>
+      </div>
+      <div class="filter-chip">🔴
+        <select>
+          <option>All Priorities</option><option>Critical</option>
+          <option>High</option><option>Medium</option><option>Low</option>
+        </select>
+      </div>
+      <div class="filter-chip">📂
+        <select>
+          <option>All Categories</option><option>Billing</option>
+          <option>Technical</option><option>Account</option>
+          <option>Feature Request</option><option>Bug</option>
+        </select>
+      </div>
+      <div class="filter-chip">👤
+        <select>
+          <option>All Agents</option><option>A. Chen</option>
+          <option>M. Okafor</option><option>S. Patel</option>
+          <option>L. Torres</option><option>J. Kim</option>
+        </select>
+      </div>
+      <div class="status-pill">
+        <div class="pulse-dot"></div>
+        LIVE · REFRESHED 09:14
+      </div>
+    </div>
+  </div>
+
+  <!-- ── KPI STRIP ── -->
+  <div class="kpi-strip">
+
+    <div class="kpi-cell" style="--cell-color: var(--blue);">
+      <div class="kpi-cell-label">Tickets Created</div>
+      <div class="kpi-cell-val" style="color:var(--blue);">2,847</div>
+      <div class="kpi-cell-footer">
+        <span class="delta-tag dt-red">↑ 14% WoW</span>
+        <span class="kpi-meta">↳ 312 today</span>
+      </div>
+    </div>
+
+    <div class="kpi-cell" style="--cell-color: var(--green);">
+      <div class="kpi-cell-label">Tickets Resolved</div>
+      <div class="kpi-cell-val" style="color:var(--green);">2,614</div>
+      <div class="kpi-cell-footer">
+        <span class="delta-tag dt-green">↑ 9% WoW</span>
+        <span class="kpi-meta">91.8% rate</span>
+      </div>
+    </div>
+
+    <div class="kpi-cell" style="--cell-color: var(--amber);">
+      <div class="kpi-cell-label">Avg Resolution Time</div>
+      <div class="kpi-cell-val" style="color:var(--amber);">4.2h</div>
+      <div class="kpi-cell-footer">
+        <span class="delta-tag dt-green">↓ 0.8h</span>
+        <span class="kpi-meta">target: &lt;6h</span>
+      </div>
+    </div>
+
+    <div class="kpi-cell" style="--cell-color: var(--green);">
+      <div class="kpi-cell-label">SLA Compliance</div>
+      <div class="sla-ring-wrap" style="margin-top: 4px; margin-bottom: 6px;">
+        <div class="sla-ring">
+          <svg viewBox="0 0 38 38">
+            <circle cx="19" cy="19" r="14" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="4"/>
+            <!-- 94.3% = 0.943 * 2π*14 = 82.9deg of circumference 87.96 -->
+            <circle cx="19" cy="19" r="14" fill="none"
+              stroke="var(--green)" stroke-width="4" stroke-linecap="round"
+              stroke-dasharray="82.9 87.96"
+              stroke-dashoffset="22"
+              transform="rotate(-90 19 19)"/>
+          </svg>
+          <div class="sla-inner">94%</div>
+        </div>
+        <div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:600;color:var(--green);letter-spacing:-1px;line-height:1;">94.3%</div>
+          <div class="kpi-meta" style="margin-top:3px;">target: 95%</div>
+        </div>
+      </div>
+      <div class="kpi-cell-footer">
+        <span class="delta-tag dt-amber">▲ 0.2pp</span>
+        <span class="kpi-meta">159 breached</span>
+      </div>
+    </div>
+
+    <div class="kpi-cell" style="--cell-color: var(--red);">
+      <div class="kpi-cell-label">Backlog Volume</div>
+      <div class="kpi-cell-val" style="color:var(--red);">233</div>
+      <div class="kpi-cell-footer">
+        <span class="delta-tag dt-red">↑ 18 tickets</span>
+        <span class="kpi-meta">⚠ above threshold</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── MAIN GRID ── -->
+  <div class="main">
+
+    <!-- ROW 1: Ticket Trend (span 2) + Funnel (span 1) -->
+
+    <!-- Ticket Volume Trend -->
+    <div class="card span-2">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Daily Ticket Trend</div>
+          <div class="card-sub">CREATED vs RESOLVED · last 28 days</div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:center;">
+          <div style="display:flex;gap:12px;">
+            <div style="display:flex;align-items:center;gap:5px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text2);">
+              <div style="width:12px;height:2px;background:var(--blue);border-radius:2px;"></div>Created
+            </div>
+            <div style="display:flex;align-items:center;gap:5px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text2);">
+              <div style="width:12px;height:2px;background:var(--green);border-radius:2px;"></div>Resolved
+            </div>
+            <div style="display:flex;align-items:center;gap:5px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text2);">
+              <div style="width:12px;height:2px;background:var(--red);border-radius:2px;border-style:dashed;border-width:0;box-shadow:none;background:repeating-linear-gradient(90deg,var(--red) 0 4px,transparent 4px 7px);height:1px;"></div>Backlog
+            </div>
+          </div>
+          <div class="mono-badge">28 DAYS</div>
+        </div>
+      </div>
+      <svg class="trend-svg" viewBox="0 0 740 160" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="blueGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#4d9eff" stop-opacity="0.18"/>
+            <stop offset="100%" stop-color="#4d9eff" stop-opacity="0"/>
+          </linearGradient>
+          <linearGradient id="greenGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#00d4a0" stop-opacity="0.14"/>
+            <stop offset="100%" stop-color="#00d4a0" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+
+        <!-- Grid lines -->
+        <line x1="30" y1="20" x2="740" y2="20" class="grid-line"/>
+        <line x1="30" y1="50" x2="740" y2="50" class="grid-line"/>
+        <line x1="30" y1="80" x2="740" y2="80" class="grid-line"/>
+        <line x1="30" y1="110" x2="740" y2="110" class="grid-line"/>
+        <line x1="30" y1="140" x2="740" y2="140" class="grid-line"/>
+
+        <!-- Y labels -->
+        <text x="26" y="24" class="ax" text-anchor="end">160</text>
+        <text x="26" y="54" class="ax" text-anchor="end">120</text>
+        <text x="26" y="84" class="ax" text-anchor="end">80</text>
+        <text x="26" y="114" class="ax" text-anchor="end">40</text>
+
+        <!-- Created area + line (bumpy, generally high 80-140 range) -->
+        <!-- y scale: 160 tickets = y:20, 0 = y:140; each ticket = 0.75px -->
+        <!-- Created values (28 days): ~80-140, mapped as y = 140 - val*0.75 -->
+        <path d="M30,95 C45,88 52,82 66,78 C75,75 84,80 96,72 C108,64 115,60 130,55 C142,50 150,58 164,52 C175,47 182,42 196,45 C208,48 214,38 228,35 C240,32 248,40 262,36 C274,32 280,28 294,30 C306,32 312,38 326,34 C338,30 344,26 358,28 C370,30 376,38 390,32 C402,26 408,22 422,20 C434,18 440,28 454,24 C466,20 472,30 486,26 C498,22 504,26 518,22 C530,18 536,22 550,25 C562,28 568,20 582,22 C594,24 600,30 614,26 C626,22 632,28 646,24 C658,20 665,25 680,22 C692,19 700,22 714,20 C722,18 728,22 740,18 L740,140 L30,140 Z"
+              fill="url(#blueGrad)"/>
+        <path d="M30,95 C45,88 52,82 66,78 C75,75 84,80 96,72 C108,64 115,60 130,55 C142,50 150,58 164,52 C175,47 182,42 196,45 C208,48 214,38 228,35 C240,32 248,40 262,36 C274,32 280,28 294,30 C306,32 312,38 326,34 C338,30 344,26 358,28 C370,30 376,38 390,32 C402,26 408,22 422,20 C434,18 440,28 454,24 C466,20 472,30 486,26 C498,22 504,26 518,22 C530,18 536,22 550,25 C562,28 568,20 582,22 C594,24 600,30 614,26 C626,22 632,28 646,24 C658,20 665,25 680,22 C692,19 700,22 714,20 C722,18 728,22 740,18"
+              fill="none" stroke="#4d9eff" stroke-width="1.8" stroke-linecap="round"/>
+
+        <!-- Resolved area + line (slightly below created) -->
+        <path d="M30,105 C45,100 52,94 66,90 C78,86 84,92 96,84 C108,76 115,72 130,68 C142,64 150,70 164,65 C175,60 182,55 196,58 C208,62 214,52 228,49 C240,46 248,55 262,50 C274,45 280,41 294,43 C306,45 312,52 326,47 C338,42 344,38 358,40 C370,42 376,50 390,44 C402,38 408,34 422,33 C434,32 440,42 454,37 C466,32 472,42 486,38 C498,34 504,38 518,34 C530,30 536,34 550,37 C562,40 568,32 582,34 C594,36 600,42 614,38 C626,34 632,40 646,36 C658,32 665,37 680,34 C692,31 700,35 714,32 C722,30 728,34 740,30 L740,140 L30,140 Z"
+              fill="url(#greenGrad)"/>
+        <path d="M30,105 C45,100 52,94 66,90 C78,86 84,92 96,84 C108,76 115,72 130,68 C142,64 150,70 164,65 C175,60 182,55 196,58 C208,62 214,52 228,49 C240,46 248,55 262,50 C274,45 280,41 294,43 C306,45 312,52 326,47 C338,42 344,38 358,40 C370,42 376,50 390,44 C402,38 408,34 422,33 C434,32 440,42 454,37 C466,32 472,42 486,38 C498,34 504,38 518,34 C530,30 536,34 550,37 C562,40 568,32 582,34 C594,36 600,42 614,38 C626,34 632,40 646,36 C658,32 665,37 680,34 C692,31 700,35 714,32 C722,30 728,34 740,30"
+              fill="none" stroke="#00d4a0" stroke-width="1.8" stroke-linecap="round"/>
+
+        <!-- Backlog dashed line (smaller values, lower on chart) -->
+        <path d="M30,128 C66,126 96,127 130,125 C164,123 196,124 228,122 C262,120 294,122 326,119 C358,116 390,118 422,115 C454,112 486,114 518,111 C550,108 582,112 614,109 C646,106 680,108 714,105 C722,104 730,104 740,103"
+              fill="none" stroke="#ff4d6a" stroke-width="1.2" stroke-dasharray="4,3" stroke-linecap="round"/>
+
+        <!-- X axis week labels -->
+        <text x="30" y="157" class="ax" text-anchor="middle">W1</text>
+        <text x="212" y="157" class="ax" text-anchor="middle">W2</text>
+        <text x="394" y="157" class="ax" text-anchor="middle">W3</text>
+        <text x="576" y="157" class="ax" text-anchor="middle">W4</text>
+        <text x="740" y="157" class="ax" text-anchor="middle">Today</text>
+
+        <!-- Spike annotation -->
+        <line x1="228" y1="32" x2="228" y2="120" stroke="rgba(255,179,64,0.25)" stroke-width="1" stroke-dasharray="2,3"/>
+        <rect x="195" y="22" width="68" height="14" rx="3" fill="rgba(255,179,64,0.12)" stroke="rgba(255,179,64,0.35)" stroke-width="1"/>
+        <text x="229" y="32" fill="#ffb340" font-size="8" font-family="IBM Plex Mono, monospace" text-anchor="middle" font-weight="600">SPIKE +34%</text>
+      </svg>
+    </div>
+
+    <!-- Ticket Status Funnel -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Ticket Status Funnel</div>
+          <div class="card-sub">OPEN → RESOLVED · active volume</div>
+        </div>
+        <div class="mono-badge">2,847 total</div>
+      </div>
+      <div class="funnel-stages">
+
+        <div class="fs-row">
+          <span class="fs-label">🔵 Open</span>
+          <div class="fs-track">
+            <div class="fs-fill" style="width:100%;background:linear-gradient(90deg,#4d9eff,#4d9eff99);">2,847</div>
+          </div>
+          <span class="fs-val">2,847</span>
+        </div>
+
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--text3);grid-column:2/4;padding:0 0 0 88px;margin-top:-4px;margin-bottom:0px;">▼ 233 remain open (backlog)</div>
+
+        <div class="fs-row" style="margin-top:2px;">
+          <span class="fs-label">🟡 In Progress</span>
+          <div class="fs-track">
+            <div class="fs-fill" style="width:83%;background:linear-gradient(90deg,#ffb340,#ffb34099);">2,362</div>
+          </div>
+          <span class="fs-val">2,362</span>
+        </div>
+
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--text3);padding:0 0 0 88px;margin-top:-4px;">▼ 485 assigned to agent</div>
+
+        <div class="fs-row" style="margin-top:2px;">
+          <span class="fs-label">🔍 Under Review</span>
+          <div class="fs-track">
+            <div class="fs-fill" style="width:68%;background:linear-gradient(90deg,#b46fff,#b46fff99);">1,940</div>
+          </div>
+          <span class="fs-val">1,940</span>
+        </div>
+
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--text3);padding:0 0 0 88px;margin-top:-4px;">▼ 422 pending QA sign-off</div>
+
+        <div class="fs-row" style="margin-top:2px;">
+          <span class="fs-label">✅ Resolved</span>
+          <div class="fs-track">
+            <div class="fs-fill" style="width:92%;background:linear-gradient(90deg,#00d4a0,#00d4a099);">2,614</div>
+          </div>
+          <span class="fs-val">2,614</span>
+        </div>
+
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--text3);padding:0 0 0 88px;margin-top:-4px;">▼ 91.8% resolution rate</div>
+
+        <div class="fs-row" style="margin-top:2px;">
+          <span class="fs-label">❌ Closed/Void</span>
+          <div class="fs-track">
+            <div class="fs-fill" style="width:12%;background:linear-gradient(90deg,var(--dim),rgba(58,85,80,0.6));">233</div>
+          </div>
+          <span class="fs-val" style="color:var(--text3);">233</span>
+        </div>
+
+        <!-- Resolution summary -->
+        <div style="margin-top:10px;padding:10px;background:var(--surface2);border-radius:6px;border:1px solid rgba(0,212,160,0.12);">
+          <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3);">Resolution efficiency</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:600;color:var(--green);">91.8%</span>
+          </div>
+          <div style="height:5px;background:var(--surface3);border-radius:3px;overflow:hidden;">
+            <div style="width:91.8%;height:100%;background:linear-gradient(90deg,#4d9eff,#00d4a0);border-radius:3px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROW 2: Agent Leaderboard (span 2) + Backlog Risk (span 1) -->
+
+    <!-- Agent Leaderboard -->
+    <div class="card span-2">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Agent Performance Leaderboard</div>
+          <div class="card-sub">RESOLVED TICKETS · AVG HANDLING TIME · SLA %</div>
+        </div>
+        <div class="mono-badge">8 agents · this week</div>
+      </div>
+
+      <div class="leaderboard-header">
+        <div class="lb-col" style="text-align:left;">#</div>
+        <div class="lb-col" style="text-align:left;">Agent</div>
+        <div class="lb-col">Resolved</div>
+        <div class="lb-col">Avg Time</div>
+        <div class="lb-col">SLA %</div>
+      </div>
+
+      <div class="leaderboard">
+
+        <div class="agent-row top">
+          <div class="agent-rank gold">🥇</div>
+          <div class="agent-info">
+            <div class="agent-name">Amara Chen</div>
+            <div class="agent-team">Tier 2 · Technical</div>
+          </div>
+          <div class="agent-stat">
+            <span class="agent-stat-val" style="color:var(--green);">412</span>
+            <span class="agent-stat-label">tickets</span>
+          </div>
+          <div class="agent-stat">
+            <span class="agent-stat-val">2.8h</span>
+            <span class="agent-stat-label">avg handle</span>
+          </div>
+          <div class="sla-compliance">
+            <span class="sla-pct" style="color:var(--green);">98.1%</span>
+            <div class="sla-bar"><div class="sla-bar-fill" style="width:98%;background:var(--green);"></div></div>
+          </div>
+        </div>
+
+        <div class="agent-row">
+          <div class="agent-rank silver">🥈</div>
+          <div class="agent-info">
+            <div class="agent-name">Marcus Okafor</div>
+            <div class="agent-team">Tier 1 · Billing</div>
+          </div>
+          <div class="agent-stat">
+            <span class="agent-stat-val" style="color:var(--green);">387</span>
+            <span class="agent-stat-label">tickets</span>
+          </div>
+          <div class="agent-stat">
+            <span class="agent-stat-val">3.2h</span>
+            <span class="agent-stat-label">avg handle</span>
+          </div>
+          <div class="sla-compliance">
+            <span class="sla-pct" style="color:var(--green);">96.4%</span>
+            <div class="sla-bar"><div class="sla-bar-fill" style="width:96%;background:var(--green);"></div></div>
+          </div>
+        </div>
+
+        <div class="agent-row">
+          <div class="agent-rank bronze">🥉</div>
+          <div class="agent-info">
+            <div class="agent-name">Shreya Patel</div>
+            <div class="agent-team">Tier 2 · Account</div>
+          </div>
+          <div class="agent-stat">
+            <span class="agent-stat-val" style="color:var(--green);">364</span>
+            <span class="agent-stat-label">tickets</span>
+          </div>
+          <div class="agent-stat">
+            <span class="agent-stat-val">3.6h</span>
+            <span class="agent-stat-label">avg handle</span>
+          </div>
+          <div class="sla-compliance">
+            <span class="sla-pct" style="color:var(--green);">95.8%</span>
+            <div class="sla-bar"><div class="sla-bar-fill" style="width:96%;background:var(--green);"></div></div>
+          </div>
+        </div>
+
+        <div class="agent-row">
+          <div class="agent-rank">4</div>
+          <div class="agent-info">
+            <div class="agent-name">Lena Torres</div>
+            <div class="agent-team">Tier 1 · General</div>
+          </div>
+          <div class="agent-stat">
+            <span class="agent-stat-val">318</span>
+            <span class="agent-stat-label">tickets</span>
+          </div>
+          <div class="agent-stat">
+            <span class="agent-stat-val">4.1h</span>
+            <span class="agent-stat-label">avg handle</span>
+          </div>
+          <div class="sla-compliance">
+            <span class="sla-pct" style="color:var(--amber);">93.2%</span>
+            <div class="sla-bar"><div class="sla-bar-fill" style="width:93%;background:var(--amber);"></div></div>
+          </div>
+        </div>
+
+        <div class="agent-row">
+          <div class="agent-rank">5</div>
+          <div class="agent-info">
+            <div class="agent-name">Jin-ho Kim</div>
+            <div class="agent-team">Tier 2 · Technical</div>
+          </div>
+          <div class="agent-stat">
+            <span class="agent-stat-val">296</span>
+            <span class="agent-stat-label">tickets</span>
+          </div>
+          <div class="agent-stat">
+            <span class="agent-stat-val">4.8h</span>
+            <span class="agent-stat-label">avg handle</span>
+          </div>
+          <div class="sla-compliance">
+            <span class="sla-pct" style="color:var(--amber);">91.7%</span>
+            <div class="sla-bar"><div class="sla-bar-fill" style="width:92%;background:var(--amber);"></div></div>
+          </div>
+        </div>
+
+        <div class="agent-row">
+          <div class="agent-rank" style="color:var(--red);">6</div>
+          <div class="agent-info">
+            <div class="agent-name">Derek Walsh</div>
+            <div class="agent-team">Tier 1 · Billing</div>
+          </div>
+          <div class="agent-stat">
+            <span class="agent-stat-val" style="color:var(--text3);">241</span>
+            <span class="agent-stat-label">tickets</span>
+          </div>
+          <div class="agent-stat">
+            <span class="agent-stat-val" style="color:var(--amber);">6.2h</span>
+            <span class="agent-stat-label">avg handle</span>
+          </div>
+          <div class="sla-compliance">
+            <span class="sla-pct" style="color:var(--red);">87.4%</span>
+            <div class="sla-bar"><div class="sla-bar-fill" style="width:87%;background:var(--red);"></div></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Backlog Risk Panel -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Backlog &amp; SLA Risk</div>
+          <div class="card-sub">BREACH ALERTS · AGING TICKETS</div>
+        </div>
+        <div class="mono-badge" style="color:var(--red);border-color:rgba(255,77,106,0.3);background:rgba(255,77,106,0.08);">⚠ 233 OPEN</div>
+      </div>
+
+      <div class="backlog-grid">
+        <div class="backlog-stat">
+          <div class="backlog-stat-label">SLA BREACHED</div>
+          <div class="backlog-stat-val" style="color:var(--red);">159</div>
+        </div>
+        <div class="backlog-stat">
+          <div class="backlog-stat-label">AT RISK (&gt;80%)</div>
+          <div class="backlog-stat-val" style="color:var(--amber);">48</div>
+        </div>
+        <div class="backlog-stat">
+          <div class="backlog-stat-label">AVG AGE (hrs)</div>
+          <div class="backlog-stat-val" style="color:var(--amber);">11.4h</div>
+        </div>
+        <div class="backlog-stat">
+          <div class="backlog-stat-label">OLDEST TICKET</div>
+          <div class="backlog-stat-val" style="color:var(--red);">62h</div>
+        </div>
+      </div>
+
+      <div class="backlog-bar-section">
+        <div class="backlog-bar-label">
+          <span>Critical breaches by priority</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:5px;">
+          <div>
+            <div class="backlog-bar-label"><span style="color:var(--red);">● Critical</span><span>72 tickets</span></div>
+            <div class="backlog-bar"><div class="backlog-fill" style="width:72%;background:var(--red);"></div></div>
+          </div>
+          <div>
+            <div class="backlog-bar-label"><span style="color:var(--amber);">● High</span><span>54 tickets</span></div>
+            <div class="backlog-bar"><div class="backlog-fill" style="width:54%;background:var(--amber);"></div></div>
+          </div>
+          <div>
+            <div class="backlog-bar-label"><span style="color:var(--blue);">● Medium</span><span>27 tickets</span></div>
+            <div class="backlog-bar"><div class="backlog-fill" style="width:27%;background:var(--blue);"></div></div>
+          </div>
+          <div>
+            <div class="backlog-bar-label"><span style="color:var(--green);">● Low</span><span>6 tickets</span></div>
+            <div class="backlog-bar"><div class="backlog-fill" style="width:6%;background:var(--green);"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:0.8px;margin-bottom:6px;text-transform:uppercase;">⏱ Longest Open Tickets</div>
+        <div class="breach-list">
+          <div class="breach-item" style="background:rgba(255,77,106,0.08);border:1px solid rgba(255,77,106,0.15);">
+            <div style="display:flex;align-items:center;">
+              <div class="breach-dot" style="background:var(--red);box-shadow:0 0 4px var(--red);"></div>
+              <span class="breach-id">#TKT-10482</span>&nbsp;·&nbsp;<span style="color:var(--text2);font-size:10px;">Billing dispute</span>
+            </div>
+            <span class="breach-age" style="color:var(--red);">62h</span>
+          </div>
+          <div class="breach-item" style="background:rgba(255,179,64,0.07);border:1px solid rgba(255,179,64,0.12);">
+            <div style="display:flex;align-items:center;">
+              <div class="breach-dot" style="background:var(--amber);"></div>
+              <span class="breach-id">#TKT-10391</span>&nbsp;·&nbsp;<span style="color:var(--text2);font-size:10px;">Auth failure</span>
+            </div>
+            <span class="breach-age" style="color:var(--amber);">44h</span>
+          </div>
+          <div class="breach-item">
+            <div style="display:flex;align-items:center;">
+              <div class="breach-dot" style="background:var(--amber);"></div>
+              <span class="breach-id">#TKT-10356</span>&nbsp;·&nbsp;<span style="color:var(--text2);font-size:10px;">Data export bug</span>
+            </div>
+            <span class="breach-age" style="color:var(--amber);">38h</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROW 3: Category Heatmap (span 3) -->
+
+    <!-- Category × Priority Heatmap -->
+    <div class="card span-3">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Issue Category × Priority Heatmap</div>
+          <div class="card-sub">TICKET VOLUME DENSITY · darker = higher volume · hover for detail</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3);">Low</span>
+          <div style="display:flex;gap:3px;">
+            <div style="width:16px;height:12px;border-radius:2px;" class="hm-0"></div>
+            <div style="width:16px;height:12px;border-radius:2px;" class="hm-2"></div>
+            <div style="width:16px;height:12px;border-radius:2px;" class="hm-3"></div>
+            <div style="width:16px;height:12px;border-radius:2px;" class="hm-5"></div>
+            <div style="width:16px;height:12px;border-radius:2px;" class="hm-6"></div>
+            <div style="width:16px;height:12px;border-radius:2px;" class="hm-8"></div>
+          </div>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3);">High</span>
+          <div class="mono-badge" style="margin-left:8px;">5 categories · 4 priorities</div>
+        </div>
+      </div>
+
+      <!-- Column headers -->
+      <div class="hm-header-row">
+        <div style="width:92px;flex-shrink:0;"></div>
+        <div class="hm-col-label" style="color:var(--low);">● Low</div>
+        <div class="hm-col-label" style="color:var(--med);">● Medium</div>
+        <div class="hm-col-label" style="color:var(--high);">● High</div>
+        <div class="hm-col-label" style="color:var(--crit);">● Critical</div>
+      </div>
+
+      <div class="heatmap-grid">
+        <!-- Billing -->
+        <div class="hm-row">
+          <div class="hm-row-label">💳 Billing</div>
+          <div class="hm-cell hm-2" title="Billing / Low: 28">28</div>
+          <div class="hm-cell hm-5" title="Billing / Medium: 94">94</div>
+          <div class="hm-cell hm-7" title="Billing / High: 147">147</div>
+          <div class="hm-cell hm-8" title="Billing / Critical: 213">213</div>
+        </div>
+
+        <!-- Technical -->
+        <div class="hm-row">
+          <div class="hm-row-label">🔧 Technical</div>
+          <div class="hm-cell hm-3" title="Technical / Low: 52">52</div>
+          <div class="hm-cell hm-6" title="Technical / Medium: 118">118</div>
+          <div class="hm-cell hm-8" title="Technical / High: 201">201</div>
+          <div class="hm-cell hm-7" title="Technical / Critical: 176">176</div>
+        </div>
+
+        <!-- Account -->
+        <div class="hm-row">
+          <div class="hm-row-label">👤 Account</div>
+          <div class="hm-cell hm-4" title="Account / Low: 63">63</div>
+          <div class="hm-cell hm-5" title="Account / Medium: 88">88</div>
+          <div class="hm-cell hm-4" title="Account / High: 71">71</div>
+          <div class="hm-cell hm-6" title="Account / Critical: 104">104</div>
+        </div>
+
+        <!-- Feature Request -->
+        <div class="hm-row">
+          <div class="hm-row-label">💡 Feature Req.</div>
+          <div class="hm-cell hm-5" title="Feature / Low: 82">82</div>
+          <div class="hm-cell hm-4" title="Feature / Medium: 64">64</div>
+          <div class="hm-cell hm-1" title="Feature / High: 18">18</div>
+          <div class="hm-cell hm-0" title="Feature / Critical: 4">4</div>
+        </div>
+
+        <!-- Bug -->
+        <div class="hm-row">
+          <div class="hm-row-label">🐛 Bug Report</div>
+          <div class="hm-cell hm-1" title="Bug / Low: 14">14</div>
+          <div class="hm-cell hm-6" title="Bug / Medium: 122">122</div>
+          <div class="hm-cell hm-7" title="Bug / High: 158">158</div>
+          <div class="hm-cell hm-8" title="Bug / Critical: 189">189</div>
+        </div>
+      </div>
+
+      <!-- Heatmap insight bar -->
+      <div style="margin-top:12px;display:flex;gap:10px;align-items:center;padding-top:10px;border-top:1px solid var(--border);">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3);">KEY INSIGHTS:</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;background:rgba(255,77,106,0.1);border:1px solid rgba(255,77,106,0.2);border-radius:3px;padding:2px 8px;color:var(--red);">
+          🔥 Billing/Critical — highest volume (213)
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;background:rgba(255,77,106,0.1);border:1px solid rgba(255,77,106,0.2);border-radius:3px;padding:2px 8px;color:var(--red);">
+          🔥 Bug/Critical — 189 tickets unresolved
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;background:rgba(0,212,160,0.08);border:1px solid rgba(0,212,160,0.15);border-radius:3px;padding:2px 8px;color:var(--green);">
+          ✓ Feature Req./Critical — low risk (4)
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── FOOTER ── -->
+  <div class="footer">
+    <div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--text3);margin-bottom:5px;letter-spacing:1px;text-transform:uppercase;">Data Sources</div>
+      <div class="footer-tables">
+        <div class="tbl-tag">fact_tickets</div>
+        <div class="tbl-tag">fact_sla_events</div>
+        <div class="tbl-tag">dim_agent</div>
+        <div class="tbl-tag">dim_priority</div>
+        <div class="tbl-tag">dim_date</div>
+      </div>
+    </div>
+    <div class="footer-right">
+      Operations &amp; Support Dashboard · Page 1 of 1<br>
+      <span style="color:var(--text3);">SLA Compliance = (Non-Breached / Total) × 100 · Backlog = Open &gt; 24h</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
